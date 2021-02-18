@@ -1,19 +1,15 @@
+#coding:utf-8
 import os
+import sys
 import threading
-
 import requests
+import time
 from bs4 import BeautifulSoup
-
 from header2dict import header2dict
 
-ROOT_URL = "https://www.nvshens.org"
-PERSON = "/girl/16232/"
-# PERSON = '/girl/22514/'
-PERSON = '/girl/27715/'
-PERSON_ID = PERSON.split('/')[-2]
-PIC_BASE = "https://t1.onvshen.com:85/gallery/16232"
-# PIC_BASE = "https://t1.onvshen.com:85/gallery/22514"
-PIC_BASE = "https://t1.onvshen.com:85/gallery/27715"
+global ORIGIN_UR,ROOT_URL,PERSON_ID,PIC_BASE
+
+
 
 
 headers = """Host: www.nvshens.org
@@ -42,11 +38,9 @@ headers2={
 "If-None-Match":"ce118ca4a39cd31:0",
 "Referer":"https://www.nvshens.org/g/34932/",
 'User-Agent':'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.4295.400 QQBrowser/9.7.12661.400',
+}
+# print(headers2)
 
-         }
-print(headers2)
-"https://www.nvshens.org/g/35005/"
-"https://www.nvshens.org/g/34932/"
 """
 程序框架
 1. ROOT页面中获取图集总数，并保存下来
@@ -76,18 +70,29 @@ def overview_locator(target_url):
     """
     web_data = requests.get(target_url, headers=headers)
     web_data = web_data.content.decode('utf-8')
+    # print(web_data)
 
     soup = BeautifulSoup(web_data, 'lxml')
-    overview_btn = soup.select('a[class="title"]')[0]
+    overview_btn=''
+    try:
+        overview_btn = soup.select('a[class="title"]')[0]
+    except:
+        pass
 
-    gallery__num = overview_btn.text[1:-1]
-    overview_url_end = overview_btn['href']
-    # print(gallery__num)
-    # print(overview_url)
-
-    return overview_url_end, gallery__num
-    pass
-
+    print(type(overview_btn))
+    if overview_btn != '':
+        gallery__num = overview_btn.text[1:-1]
+        overview_url_end = overview_btn['href']
+        return overview_url_end, gallery__num
+    else:
+        gallery__num = 0
+        gallery__url_list = []
+        photo_ul = soup.select('ul[class="photo_ul"]')[0]
+        for li in photo_ul.children:
+            gallery__num += 1
+            gallery__url_list.append(ROOT_URL + li.a['href'])
+            # print(li.a['href'])
+        return gallery__url_list, gallery__num
 
 def overview_parser(overview_url, page_num):
     """
@@ -100,7 +105,7 @@ def overview_parser(overview_url, page_num):
     # 根据传入的页面数访问对应总览页并采集重要数据
     for index in range(1, page_num + 1):
         my_overview_url = f'{overview_url}{index}.html'
-        print(index)
+        # print(index)
         web_data = requests.get(my_overview_url, headers=headers)
 
         # 获取到目标页面数据
@@ -119,19 +124,23 @@ def overview_parser(overview_url, page_num):
 
 def gallery_parser(target_url):
     """
-    doc：应返回图床id，该版本目前还未添加
+    doc：
     :param target_url: 具体相册链接
     :return: 图片总数
     """
-    # print(target_url)
+    print(target_url)
     web_data = requests.get(target_url, headers=headers)
     soup = BeautifulSoup(web_data.content, 'lxml')
 
-    album_info = soup.select('div[id="dinfo"] > span')[0]
-    # print(album_info.text.split('张')[0])
-    gallery_pieces = int(album_info.text.split('张')[0])
+    try:
+        album_info = soup.select('div[id="dinfo"] > span')[0]
+        # print(album_info.text.split('张')[0])
+        print('album_info',album_info)
+        gallery_pieces = int(album_info.text.split('张')[0])
 
-    return gallery_pieces
+        return gallery_pieces
+    except:
+        return -1
 
 
 def write_gallery_info_to_disk(gallery_url_list):
@@ -154,11 +163,16 @@ def write_gallery_info_to_disk(gallery_url_list):
 
     for gallery_url in gallery_url_list:
         photo_num = gallery_parser(gallery_url)  # 得到相册图片数
-        print(gallery_url)
-        gid = gallery_url.split('/')[-2]
-        print(gid, photo_num)
-        with open(path_gallery_info_file, 'a') as f_info:
-            f_info.write(f'{gid},{photo_num}\n')
+        if photo_num != -1:
+            print(gallery_url)
+            gid = gallery_url.split('/')[-2]
+            print(gid, photo_num)
+            with open(path_gallery_info_file, 'a') as f_info:
+                f_info.write(f'{gid},{photo_num}\n')
+        else:
+            with open(path_gallery_info_file, 'a') as f_info:
+                f_info.write(f'0,0\n')
+
 
     return path_gallery_info_file
 
@@ -168,9 +182,9 @@ def pic_to_disk(path_info_file):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    fd_info_file = open(path_info_file, 'r')
-    GALLERY_INFO_LIST = fd_info_file.readlines()
-    print(GALLERY_INFO_LIST)
+    # fd_info_file = open(path_info_file, 'r')
+    # GALLERY_INFO_LIST = fd_info_file.readlines()
+    # print(GALLERY_INFO_LIST)
 
 def craw(t_ucont, tname):
     img_data_list = []
@@ -185,6 +199,8 @@ def craw(t_ucont, tname):
     tmp = my_info.split(',')
     my_gid = tmp[0]
     my_pnum = tmp[1]
+    if my_gid == '0':
+        return
 
     output_dir = f'./{PERSON_ID}/{my_gid}'
     if not os.path.exists(output_dir):
@@ -218,7 +234,7 @@ def craw(t_ucont, tname):
                     pic.close()
                 img_data_list.append(img_data)
             else:
-                print(res.status_code, "无法访问到: ", img_url)
+                print(res.status_code, "[ Error ]无法访问到: ", img_url)
 
             if current_pic == 3:
                 current_html += 1
@@ -241,11 +257,17 @@ def craw(t_ucont, tname):
     #     print(e)
 
 def thread_start(c1, c2, c3, c4):
+    info_file = open(f"./{PERSON_ID}.info")
+    file_content = info_file.readlines()
+    _len = len(file_content)
+    print("条目数:",_len)
+
     threads = []
     thread1 = myThread(1, "T1", c1)
     thread2 = myThread(2, "T2", c2)
     thread3 = myThread(3, "T3", c3)
     thread4 = myThread(4, "T4", c4)
+
 
     thread1.start()
     thread2.start()
@@ -257,55 +279,109 @@ def thread_start(c1, c2, c3, c4):
     threads.append(thread3)
     threads.append(thread4)
 
+    if _len < 4:
+        for i in range(_len):
+            ret = threads.pop()
+            print(ret)
+
     for td in threads:
         td.join()
 
-def threads_loop():
-    c1 = 0
-    c2 = 1
-    c3 = 2
-    c4 = 3
-    loop = True
-    while loop:
+def threads_controller(gallery_count):
+    print("相册总数: ",gallery_count)
+    c1=0
+    c2=1
+    c3=2
+    c4=3
+
+    while True:
         thread_start(c1, c2, c3, c4)
         c1 += 4
         c2 += 4
         c3 += 4
         c4 += 4
 
-        if c4 > 46:
+        if c4 >= gallery_count+4:
             break
-    return True
+
 
 def main():
 
-    target_rul = ROOT_URL + PERSON
+    target_rul = ORIGIN_URL
     # get the overview url and count of gallery
     result_overview_locator = overview_locator(target_rul)
+    gallery_count = 0
 
-    # link two parts of url
-    overview_url = ROOT_URL + result_overview_locator[0]
-    print(overview_url)
+    # 处理上一步得到的结果
+    # 情况1 相册数大于6，需要进一步获取其他相册链接
+    if type(result_overview_locator[0]) != type([]):
+        # link two parts of url
+        overview_url = ROOT_URL + result_overview_locator[0]
+        print(overview_url)
 
-    # calc page num
-    mid_val = int(result_overview_locator[1]) / 30
-    page_num = int(mid_val) + 1
+        # calc page num
+        mid_val = int(result_overview_locator[1]) / 30
+        page_num = int(mid_val) + 1
 
-    gallery_url_list = overview_parser(overview_url, page_num)
+        gallery_url_list = overview_parser(overview_url, page_num)
+        gallery_count = len(gallery_url_list)
 
-    path_info_file = write_gallery_info_to_disk(gallery_url_list)
-    print(path_info_file)
-    pic_to_disk(path_info_file)
+        path_info_file = write_gallery_info_to_disk(gallery_url_list)
+        print(path_info_file)
+        pic_to_disk(path_info_file)
 
+    else:   # 情况2 相册数小于六，在页面中直接获取到了所有相册链接
+        gallery_url_list = result_overview_locator[0]
+        gallery_count = len(gallery_url_list)
+        path_info_file = write_gallery_info_to_disk(gallery_url_list)
+        print(path_info_file)
+        pic_to_disk(path_info_file)
+
+    # 启动线程控制器
+    threads_controller(gallery_count)
+
+def help():
+    print(
+        """
+        Normally, The outermost URL is you must input.\n
+        Any value of other may cause program run error.\n
+        Also you can input the name of output dir, its not a necessary value,\n
+        if you dont input it, the name of output dir will be set to girl id.
+        """
+    )
+    pass
+
+def raise_usege():
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <URL> [name of output dir]")
+        print('Please try "python main.py help" to get more info')
+        exit(-1)
+
+    if len(sys.argv) == 2:
+        if sys.argv[1] == 'help':
+            help()
+            exit()
 
 def debug():
-    gallery_parser()
+    URL = 'https://www.nvshens.org/girl/26089/'
+    res = overview_locator(URL)
+    print(res)
 
 if __name__ == '__main__':
+    now = time.time()
+
+    raise_usege()
+    # ORIGIN_URL = 'https://www.nvshens.org/girl/27912/'
+    ORIGIN_URL = sys.argv[1]
+    ROOT_URL = "https://www.nvshens.org"
+    PERSON_ID = ORIGIN_URL.split('/')[-2]
+    PIC_BASE = f"https://t1.onvshen.com:85/gallery/{PERSON_ID}"
+
     if main() == -1:
         print("program run error")
 
-    while threads_loop():
-        pass
-
-    # debug()
+    if len(sys.argv) == 3:
+        if not os.path.exists(sys.argv[2]):
+            os.rename(f"./{PERSON_ID}", sys.argv[2])
+        else:
+            os.rename(f"./{PERSON_ID}", f"./{sys.argv[2]}{now}")
