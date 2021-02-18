@@ -1,4 +1,12 @@
 # nvshen
+拉取源码
+
+```
+git clone https://gitee.com/JensenHua/nvshen
+```
+
+
+
 使用方法
 
 ```
