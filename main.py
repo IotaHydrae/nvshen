@@ -1,4 +1,4 @@
-#coding:utf-8
+# coding:utf-8
 import os
 import sys
 import threading
@@ -7,12 +7,9 @@ import time
 from bs4 import BeautifulSoup
 from header2dict import header2dict
 
-global ORIGIN_UR,ROOT_URL,PERSON_ID,PIC_BASE
+global ORIGIN_UR, ROOT_URL, PERSON_ID, PIC_BASE
 
-
-
-
-headers = """Host: www.nvshens.org
+headers = """Host: www.fnvshen.com
 Connection: keep-alive
 sec-ch-ua: "Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"
 sec-ch-ua-mobile: ?0
@@ -28,18 +25,21 @@ Accept-Language: zh-CN,zh;q=0.9
 Cookie: records=%5B%7B%22id%22%3A%2216232%22%2C%22name%22%3A%22%u674E%u598D%u66E6%22%7D%5D; UM_distinctid=177ab1010f63db-0b00abb79b0a27-13e3563-384000-177ab1010f7c58; CNZZDATA1279553903=1298368565-1613482688-https%253A%252F%252Fwww.nvshens.org%252F%7C1613482688; 3501_2470_112.9.212.227=1; Hm_lvt_0f1f5a5e4d9fc6dc0f52ab6f2ec45893=1613482699; gallery_32261=1; 3502_2499_112.9.212.227=1; gallery_30218=1; 3502_2325_112.9.212.227=1; richviews_3502=v9BNVM0UVmiulJdHIx3tIQ0lE4dIVibGExL67k9s3wT%252B7QqABpwWVFB58p2Pm%252BMSBFchr6XUIEnXKCJBZCDL6AjIRF62f7Dj4cqs2dXUAROoyeqDBqXXbKspxcg8mObTbxjwEs45G36ztxvcNllrZPeRMArdNKzplcaCjg%252B2Q5SP5wjlfUEzh95kT6ROHXJ36MrjGvVMXRtoqHChiKFHkisheIHPh%252BdK1fThdZijxcU1Nuc61JSrYGmXEwsr3XmuAY%252FFNO84reyXC%252Flz4C%252BrhhShvDB6xPSO9vi7QrNQ0MXM8i2z9uS7gOY4u3K2%252BEEiMQ2axMal4UcXhrH0RQZ3%252FA%253D%253D; 3502_2538_112.9.212.227=1; Hm_lpvt_0f1f5a5e4d9fc6dc0f52ab6f2ec45893=1613482718; gallery_32327=1; 3501_2320_112.9.212.227=1; beitouviews_3501=QmmNZGf9GWBULu%252FIEFOuVaPHJ5hhVxoWlXJz4lU9eulCU4m0jtmcVIKmI0W9Ib5mE9cxZXMpGaLGXHyoJzGmjrHozrQf83UUYDB%252BUZTG%252FBL9Ng4pDmdOd%252F4oBc0j2U0bQ40G2C8tPYCcGtBVZddf6H5fQ1HFF%252Fcca4uXbeje758%252BXQH9QzzrIrIwKk909B30DaSyZm63caDrMbFxc9viA%252Fb5V%252BxTOP5kPaL1XD4H1l4Ub9%252BGBGj5OHqmzX%252FmFDDfAhd%252FhX8w2MEweaDdNkmAw5BsVUdr7ADuWeW6m1WW5esKeFe0WyIslxNtdrAnyhbdW1PsXC5Qr52xkB0qM8PJUw%253D%253D; 3501_2517_112.9.212.227=1"""
 headers = header2dict(headers)
 
-headers2={
-'Accept':'image/webp,image/*,*/*;q=0.8',
-'Accept-Encoding':'gzip, deflate, sdch, br',
-'Accept-Language':'zh-CN,zh;q=0.8',
-'Cache-Control':'max-age=0',
-'Connection':'keep-alive',
-'Host':'t1.onvshen.com:85',
-"If-None-Match":"ce118ca4a39cd31:0",
-"Referer":"https://www.nvshens.org/g/34932/",
-'User-Agent':'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.104 Safari/537.36 Core/1.53.4295.400 QQBrowser/9.7.12661.400',
-}
-# print(headers2)
+# headers2='''Host: www.fnvshen.com
+# User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0
+# Accept: image/avif,image/webp,*/*
+# Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+# Accept-Encoding: gzip, deflate, br
+# Connection: keep-alive
+# Referer: https://www.fnvshen.com/girl/27781/
+# Cookie: gallery_37757=1; gallery_38286=1; gallery_38242=1; gallery_38041=1; gallery_38638=1; gallery_38379=1; gallery_38303=1; gallery_37930=1; gallery_38690=1; gallery_38495=1; gallery_37956=1; gallery_37821=1; gallery_38415=1; gallery_38070=1; gallery_38575=1; records=%5B%7B%22id%22%3A%2226002%22%2C%22name%22%3A%22%u5C31%u662F%u963F%u6731%u554A%22%7D%2C%7B%22id%22%3A%2224410%22%2C%22name%22%3A%22%u5468%u4E8E%u5E0Cdummy%22%7D%2C%7B%22id%22%3A%2227781%22%2C%22name%22%3A%22%u5C0F%u86EE%u5996%22%7D%5D; gallery_38513=1; gallery_38156=1; gallery_37825=1; gallery_38350=1; gallery_38592=1; richviews_3502=Pjfi6XFJzr4VPruyuntvGwnXkMNej9Q6D4FwvJuhvo6KiCYDbyCGpHan4tfuh9gnqrvWGXnp6FElhNOeb620qMtLkzIh57x4YVzmAnCKThHGFzvBs6wlIiuT3kybkhucECDLZXore3eG1%252F0RsJ6N%252Bwg1Htiq0GNeBXcZF6oz50C0lRbr6ZR01H471lgsGDZ6WmE6IrVV%252B87jQmLu%252FXhrVbq%252BkalvawcjSE6sF1qQb1KVq%252F2Qp5Z1SGkQUOAo0ZqwmlCFj3KDEpCx1lfXTYp18U1Alpk27z55vDwRqvSHJNUDUjrlfMkkkkhid7FO5ohzYR%252BtV3xZ9eCSVX%252FDuYydPA%253D%253D; 3502_2441_111.199.103.172=1; gallery_38792=1; 3502_2319_111.199.103.172=1; 3502_2367_111.199.103.172=1; Hm_lvt_1bb490b9b92efa278bd96f00d3d8ebb4=1655748966; Hm_lpvt_1bb490b9b92efa278bd96f00d3d8ebb4=1655748966
+# Sec-Fetch-Dest: image
+# Sec-Fetch-Mode: no-cors
+# Sec-Fetch-Site: same-origin'''
+# # print(headers2)
+# headers = header2dict(headers2)
+#
+# headers = ''
 
 """
 程序框架
@@ -48,6 +48,7 @@ headers2={
 3. 
 """
 GALLERY_INFO_LIST = ''
+
 
 class myThread(threading.Thread):
     def __init__(self, tid, tname, t_ucount):
@@ -73,7 +74,7 @@ def overview_locator(target_url):
     # print(web_data)
 
     soup = BeautifulSoup(web_data, 'lxml')
-    overview_btn=''
+    overview_btn = ''
     try:
         overview_btn = soup.select('a[class="title"]')[0]
     except:
@@ -87,12 +88,16 @@ def overview_locator(target_url):
     else:
         gallery__num = 0
         gallery__url_list = []
-        photo_ul = soup.select('ul[class="photo_ul"]')[0]
+        photo_ul = soup.select('ul[class="photo_ul"]')
+        #
+        # print(photo_ul)
+        # exit()
         for li in photo_ul.children:
             gallery__num += 1
             gallery__url_list.append(ROOT_URL + li.a['href'])
             # print(li.a['href'])
         return gallery__url_list, gallery__num
+
 
 def overview_parser(overview_url, page_num):
     """
@@ -135,7 +140,7 @@ def gallery_parser(target_url):
     try:
         album_info = soup.select('div[id="dinfo"] > span')[0]
         # print(album_info.text.split('张')[0])
-        print('album_info',album_info)
+        print('album_info', album_info)
         gallery_pieces = int(album_info.text.split('张')[0])
 
         return gallery_pieces
@@ -173,7 +178,6 @@ def write_gallery_info_to_disk(gallery_url_list):
             with open(path_gallery_info_file, 'a') as f_info:
                 f_info.write(f'0,0\n')
 
-
     return path_gallery_info_file
 
 
@@ -186,11 +190,12 @@ def pic_to_disk(path_info_file):
     # GALLERY_INFO_LIST = fd_info_file.readlines()
     # print(GALLERY_INFO_LIST)
 
+
 def craw(t_ucont, tname):
     img_data_list = []
     current_html = 1
     downloader_session = requests.session()
-    downloader_session.headers = headers2
+    downloader_session.headers = headers
 
     fd_info_file = open(f'./{PERSON_ID}.info', 'r')
     info_list = fd_info_file.readlines()
@@ -206,8 +211,8 @@ def craw(t_ucont, tname):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    print("当前网页: ", f'https://www.nvshens.org/g/{my_gid}/{current_html}.html')
-    downloader_session.get(f'https://www.nvshens.org/g/{my_gid}/{current_html}.html')
+    print("当前网页: ", f'{ROOT_URL}/g/{my_gid}/{current_html}.html')
+    downloader_session.get(f'{ROOT_URL}/g/{my_gid}/{current_html}.html')
     current_pic = 0
 
     for pic_index in range(int(my_pnum)):
@@ -238,8 +243,8 @@ def craw(t_ucont, tname):
 
             if current_pic == 3:
                 current_html += 1
-                print("[ Current ]当前网页: ", f'https://www.nvshens.org/g/{my_gid}/{current_html}.html')
-                downloader_session.get(f'https://www.nvshens.org/g/{my_gid}/{current_html}.html', headers=headers2)
+                print("[ Current ]当前网页: ", f'https://www.fnvshen.com/g/{my_gid}/{current_html}.html')
+                downloader_session.get(f'https://www.fnvshen.com/g/{my_gid}/{current_html}.html', headers=headers2)
                 current_pic = 0
 
     # count = 0
@@ -256,18 +261,18 @@ def craw(t_ucont, tname):
     # except Exception as e:
     #     print(e)
 
+
 def thread_start(c1, c2, c3, c4):
     info_file = open(f"./{PERSON_ID}.info")
     file_content = info_file.readlines()
     _len = len(file_content)
-    print("条目数:",_len)
+    print("条目数:", _len)
 
     threads = []
     thread1 = myThread(1, "T1", c1)
     thread2 = myThread(2, "T2", c2)
     thread3 = myThread(3, "T3", c3)
     thread4 = myThread(4, "T4", c4)
-
 
     thread1.start()
     thread2.start()
@@ -287,12 +292,13 @@ def thread_start(c1, c2, c3, c4):
     for td in threads:
         td.join()
 
+
 def threads_controller(gallery_count):
-    print("相册总数: ",gallery_count)
-    c1=0
-    c2=1
-    c3=2
-    c4=3
+    print("相册总数: ", gallery_count)
+    c1 = 0
+    c2 = 1
+    c3 = 2
+    c4 = 3
 
     while True:
         thread_start(c1, c2, c3, c4)
@@ -301,12 +307,11 @@ def threads_controller(gallery_count):
         c3 += 4
         c4 += 4
 
-        if c4 >= gallery_count+4:
+        if c4 >= gallery_count + 4:
             break
 
 
 def main():
-
     target_rul = ORIGIN_URL
     # get the overview url and count of gallery
     result_overview_locator = overview_locator(target_rul)
@@ -330,7 +335,7 @@ def main():
         print(path_info_file)
         pic_to_disk(path_info_file)
 
-    else:   # 情况2 相册数小于六，在页面中直接获取到了所有相册链接
+    else:  # 情况2 相册数小于六，在页面中直接获取到了所有相册链接
         gallery_url_list = result_overview_locator[0]
         gallery_count = len(gallery_url_list)
         path_info_file = write_gallery_info_to_disk(gallery_url_list)
@@ -339,6 +344,7 @@ def main():
 
     # 启动线程控制器
     threads_controller(gallery_count)
+
 
 def help():
     print(
@@ -351,6 +357,7 @@ def help():
     )
     pass
 
+
 def raise_usege():
     if len(sys.argv) < 2:
         print("Usage: python main.py <URL> [name of output dir]")
@@ -362,10 +369,12 @@ def raise_usege():
             help()
             exit()
 
+
 def debug():
-    URL = 'https://www.nvshens.org/girl/26089/'
+    URL = 'http://www.fnvshen.com/girl/26089/'
     res = overview_locator(URL)
     print(res)
+
 
 if __name__ == '__main__':
     now = time.time()
@@ -373,9 +382,9 @@ if __name__ == '__main__':
     raise_usege()
     # ORIGIN_URL = 'https://www.nvshens.org/girl/27912/'
     ORIGIN_URL = sys.argv[1]
-    ROOT_URL = "https://www.nvshens.org"
+    ROOT_URL = "http://www.fnvshen.com"
     PERSON_ID = ORIGIN_URL.split('/')[-2]
-    PIC_BASE = f"https://t1.onvshen.com:85/gallery/{PERSON_ID}"
+    PIC_BASE = f"http://t1.buuxk.com:85/gallery/{PERSON_ID}"
 
     if main() == -1:
         print("program run error")
