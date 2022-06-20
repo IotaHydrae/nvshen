@@ -1,21 +1,17 @@
 # nvshen
-拉取源码
 
+Keep update
 ```
-git clone https://gitee.com/JensenHua/nvshen
-```
-
-
-
-使用方法
-
-```
-python main.py https://www.nvshens.org/girl/16232/ 心妍
+git fetch origin
+git pull origin main
 ```
 
-帮助
+Usage
+```
+python main.py https://www.fnvshen.com/girl/16232/ 心妍
+```
 
+Help
 ```
 python main.py help
 ```
-
